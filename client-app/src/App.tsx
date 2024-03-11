@@ -18,9 +18,9 @@ function App() {
       <Header as='h2' icon='users' content='Reactivities' />
       <List>
         {activities.map((activity: any) => (
-          <List.Item key={activity.id}>
+          <ListItem key={activity.id}>
             {activity.title}
-          </List.Item>
+          </ListItem>
         ))}
       </List>
     </div>
