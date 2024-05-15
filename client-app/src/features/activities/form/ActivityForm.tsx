@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import {v4 as uuid} from 'uuid';
-import { Activity } from "../../../app/models/activity";
+import { ActivityFormValues } from "../../../app/models/activity";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 import MyTextInput from "../../../app/common/form/MyTextInput";
@@ -16,20 +16,11 @@ import MyDateInput from "../../../app/common/form/MyDateInput";
 
 export default observer(function ActivityForm() {
     const {activityStore} = useStore();
-    const {createActivity, updateActivity, loading, loadingInitial,
+    const {createActivity, updateActivity, loadingInitial,
         loadActivity} = activityStore;
     const {id} = useParams();
     const navigate = useNavigate();
-    const initialState: Activity = {
-        id: '',
-        title: '',
-        category: '',
-        description: '',
-        date: null,
-        city: '',
-        venue: ''
-    };
-    const [activity, setActivity] = useState(initialState);
+    const [activity, setActivity] = useState(new ActivityFormValues());
     const validationSchema = Yup.object({
         title: Yup.string().required('The activity title is required'),
         description: Yup.string().required('The activity description is required'),
@@ -40,11 +31,11 @@ export default observer(function ActivityForm() {
     });
     useEffect(function() {
         if (id) {
-            loadActivity(id).then((activity) => setActivity(activity!));
+            loadActivity(id).then((activity) => setActivity(new ActivityFormValues(activity)));
         }
     }, [id, loadActivity]);
 
-    function handleFormSubmit(activity: Activity) {
+    function handleFormSubmit(activity: ActivityFormValues) {
         let promise: Promise<void>;
         if (!activity.id) {
             activity.id = uuid();
@@ -80,7 +71,10 @@ export default observer(function ActivityForm() {
                          <Header content='Location Details' sub color='teal'/>
                         <MyTextInput placeholder='City' name='city'/>
                         <MyTextInput placeholder='Venue' name='venue'/>
-                        <Button disabled={isSubmitting || !dirty || !isValid} loading={loading} floated="right" positive type='submit' content='Submit' />
+                        <Button
+                            disabled={isSubmitting || !dirty || !isValid}
+                            loading={isSubmitting} floated="right" 
+                            positive type='submit' content='Submit' />
                         <Button as={Link} to='/activities' floated="right" type='button' content='Cancel' />
                     </Form>
                 )}
