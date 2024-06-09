@@ -1,4 +1,5 @@
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -18,9 +19,11 @@ namespace Application.Activities
         {
             public DataContext DataContext { get; }
             private readonly IMapper _mapper;
+            private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext dataContext, IMapper mapper)
+            public Handler(DataContext dataContext, IMapper mapper, IUserAccessor userAccessor)
             {
+                _userAccessor = userAccessor;
                 _mapper = mapper;
                 DataContext = dataContext;
             }
@@ -28,8 +31,8 @@ namespace Application.Activities
             public async Task<Result<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var ActivityDto = await DataContext.Activities
-                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync(x=>x.Id == request.Id, cancellationToken);
+                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUsername() })
+                    .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                 return Result<ActivityDto>.Success(ActivityDto);
             }
         }

@@ -6,6 +6,9 @@ export interface IProfile {
     image?: string;
     bio?: string;
     photos?: Photo[];
+    followersCount: number;
+    followingCount: number;
+    following: boolean;
 }
 
 export class Profile implements IProfile {
@@ -19,6 +22,9 @@ export class Profile implements IProfile {
     image?: string | undefined;
     bio?: string | undefined;
     photos?: Photo[] | undefined;
+    followersCount: number = 0;
+    followingCount: number = 0;
+    following: boolean = false;
 }
 
 export interface Photo {
