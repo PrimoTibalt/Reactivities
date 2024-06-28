@@ -1,7 +1,9 @@
 using Application.Activities;
 using Application.Comments;
+using Application.Profiles;
 using AutoMapper;
 using Domain;
+using Profile = AutoMapper.Profile;
 
 namespace Application.Core
 {
@@ -12,6 +14,9 @@ namespace Application.Core
             string currentUsername = null;
             CreateMap<Activity, Activity>()
                 .ForMember(a => a.Id, a => a.Ignore());
+            CreateMap<Activity, UserActivityDto>()
+                .ForMember(d => d.HostUsername, o => o.MapFrom(a =>
+                    a.Attendees.FirstOrDefault(h => h.IsHost).AppUser.UserName));
             CreateMap<Activity, ActivityDto>()
                 .ForMember(d => d.HostUsername, o => o.MapFrom(a =>
                     a.Attendees.FirstOrDefault(h => h.IsHost).AppUser.UserName));

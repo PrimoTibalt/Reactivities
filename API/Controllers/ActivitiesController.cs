@@ -1,5 +1,4 @@
 using Application.Activities;
-using Application.Core;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +7,12 @@ namespace API.Controllers
 {
     public class ActivitiesController : BaseApiController
     {
+        [HttpGet("/api/profiles/{username}/activities")]
+        public async Task<IActionResult> GetUserActivities(string username, [FromQuery] string predicate)
+        {
+            return HandleResult(await Mediator.Send(new ListByUser.Query { Predicate = predicate, Username = username }));
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetActivities([FromQuery] ActivityParams param)
         {
