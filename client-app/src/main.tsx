@@ -8,11 +8,14 @@ import 'react-calendar/dist/Calendar.css'
 import { StoreContext, store } from './app/stores/store.ts'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './app/router/Routes.tsx'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <StoreContext.Provider value={store}>
-      <RouterProvider router={router} />
+      <GoogleOAuthProvider clientId='<placeholder>'>
+        <RouterProvider router={router} />
+      </GoogleOAuthProvider>
     </StoreContext.Provider>
   </React.StrictMode>,
 )

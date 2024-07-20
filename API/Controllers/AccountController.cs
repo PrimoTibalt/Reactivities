@@ -15,11 +15,50 @@ namespace API.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly TokenService _tokenService;
+        private readonly IConfiguration _config;
+        private readonly HttpClient _httpClient;
 
-        public AccountController(UserManager<AppUser> userManager, TokenService tokenService)
+        public AccountController(UserManager<AppUser> userManager, TokenService tokenService, IConfiguration config)
         {
+            _httpClient = new HttpClient
+            {
+                BaseAddress = new Uri("https://oauth2.googleapis.com")
+            };
+            _config = config;
             _tokenService = tokenService;
             _userManager = userManager;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("google")]
+        public async Task<ActionResult<UserDto>> GoogleLogin(string accessToken)
+        {
+            var tokenInfo = await _httpClient.GetFromJsonAsync<TokenInfo>("tokeninfo?id_token=" + accessToken);
+            if (tokenInfo.Aud != _config["Authentication:Google:ClientId"])
+                return Unauthorized();
+
+            var user = await _userManager.Users.Include(p => p.Photos)
+                .FirstOrDefaultAsync(x => x.Email == tokenInfo.Email);
+
+            if (user is not null) return GetUserDto(user);
+            
+            user = new AppUser {
+                DisplayName = tokenInfo.GivenName + ' ' + tokenInfo.FamilyName,
+                Photos = [
+                    new Photo {
+                        Id = "ggl_"+ tokenInfo.Picture.Split("/a/")[1],
+                        Url = tokenInfo.Picture,
+                        IsMain = true
+                    }
+                ],
+                UserName = tokenInfo.Email,
+                Email = tokenInfo.Email
+            };
+
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded) return BadRequest("Problem creating user account");
+
+            return GetUserDto(user);
         }
 
         [AllowAnonymous]

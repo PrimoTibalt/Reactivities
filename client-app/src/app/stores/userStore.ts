@@ -6,6 +6,7 @@ import { router } from "../router/Routes";
 
 export default class UserStore {
     user: User | null = null;
+    googleLoading = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -52,6 +53,23 @@ export default class UserStore {
 
     setDisplayName = (name: string) => {
         if (this.user) this.user.displayName = name;
+    }
+
+    googleLogin = async (accessToken: string) => {
+        try {
+            this.googleLoading = true;
+            const user = await agent.Account.googleLogin(accessToken);
+            store.commonStore.setToken(user.token);
+            runInAction(() => {
+                this.user = user;
+                this.googleLoading = false;
+            })
+        } catch (error) {
+            console.log(error);
+            runInAction(() => {
+                this.googleLoading = false;
+            })
+        }
     }
 }
 
