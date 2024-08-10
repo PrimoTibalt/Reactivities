@@ -18,7 +18,9 @@ namespace API.Extensions
             services.AddSwaggerGen();
             services.AddDbContext<DataContext>(options =>
             {
+                Console.WriteLine("Hello");
                 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                Console.WriteLine(env);
 
                 string connStr;
 
@@ -33,19 +35,21 @@ namespace API.Extensions
                 {
                     // Use connection string provided at runtime by FlyIO.
                     var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+                    Console.WriteLine(connUrl);
 
                     // Parse connection URL to connection string for Npgsql
                     connUrl = connUrl.Replace("postgres://", string.Empty);
                     var pgUserPass = connUrl.Split("@")[0];
                     var pgHostPortDb = connUrl.Split("@")[1];
                     var pgHostPort = pgHostPortDb.Split("/")[0];
-                    var pgDb = pgHostPortDb.Split("/")[1];
+                    var pgDb = pgHostPortDb.Split("/")[1].Replace("?sslmode=disable", string.Empty);
                     var pgUser = pgUserPass.Split(":")[0];
                     var pgPass = pgUserPass.Split(":")[1];
-                    var pgHost = pgHostPort.Split(":")[0];
+                    var pgHost = pgHostPort.Split(":")[0].Replace("flycast", "internal");
                     var pgPort = pgHostPort.Split(":")[1];
 
                     connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
+                    Console.WriteLine(connStr);
                 }
 
                 // Whether the connection string came from the local development configuration file
@@ -60,7 +64,7 @@ namespace API.Extensions
                     policy.AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithOrigins("http://localhost:3000", "https://localhost:3000");
+                        .WithOrigins("http://localhost:3000", "https://localhost:3000", "https://reactivities-sparkling-fire-9437.fly.dev");
                 });
             });
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(List.Handler).Assembly));
