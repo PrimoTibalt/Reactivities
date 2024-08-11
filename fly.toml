@@ -13,6 +13,7 @@ primary_region = 'ams'
   ASPNETCORE_URLS = 'http://+:8080'
   Cloudinary__ApiKey = '375218915727792'
   Cloudinary__CloudName = 'dwoffjjwn'
+  Authentication__Google__ClientId = '532820092395-4e3i3o2vutma679ub0dr6miqhnc7s41b.apps.googleusercontent.com'
 
 [http_service]
   internal_port = 8080
