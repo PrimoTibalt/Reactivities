@@ -31,7 +31,9 @@ namespace API.Extensions
                         ValidateIssuerSigningKey = true, // Validates is token signing valid
                         IssuerSigningKey = key,
                         ValidateIssuer = false,
-                        ValidateAudience = false
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
                     };
                     opt.Events = new JwtBearerEvents
                     {
