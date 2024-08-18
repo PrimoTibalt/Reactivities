@@ -3,10 +3,12 @@ using Application.Core;
 using Application.Interfaces;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Infrastructure.Email;
 using Infrastructure.Photos;
 using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
+using Resend;
 
 namespace API.Extensions
 {
@@ -68,6 +70,17 @@ namespace API.Extensions
                         .WithOrigins("http://localhost:3000", "https://localhost:3000", "https://reactivities-sparkling-fire-9437.fly.dev");
                 });
             });
+
+            services.AddOptions();
+            services.AddHttpClient<ResendClient>();
+            services.Configure<ResendClientOptions>(o =>
+            {
+                o.ApiToken = Environment.GetEnvironmentVariable("RESEND_APITOKEN") ??
+                    config["RESEND_APITOKEN"] ??
+                    throw new ArgumentException("No token specified");
+            });
+            services.AddTransient<IResend, ResendClient>();
+
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(List.Handler).Assembly));
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();
@@ -75,6 +88,7 @@ namespace API.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.AddScoped<EmailSender>();
             services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
             services.AddSignalR();
         }
